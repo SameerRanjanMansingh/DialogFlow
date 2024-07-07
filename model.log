@@ -1,4 +1,0 @@
-2024-07-02 21:41:27,849 - my_app - INFO - print successfully
-2024-07-02 21:43:43,528 - my_app - ERROR - An error occurred while building the model: name 's' is not defined
-2024-07-02 21:45:28,515 - my_app - CRITICAL - An error occurred while building the model: name 's' is not defined
-2024-07-02 21:45:44,733 - my_app - WARNING - An error occurred while building the model: name 's' is not defined
