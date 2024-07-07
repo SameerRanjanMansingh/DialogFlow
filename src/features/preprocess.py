@@ -1,6 +1,6 @@
 import nltk
 import re
-import string
+import ast
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer, WordNetLemmatizer
 import numpy as np
@@ -82,6 +82,8 @@ def split_data(df):
     y = []
 
     try:
+        df["Tokenized_Text"] = df["Tokenized_Text"].apply(ast.literal_eval)
+
         for _, row in df.iterrows():
             tokens = row['Tokenized_Text']
             if len(tokens) > sequence_length:  # Ensure there are enough tokens for a sequence
@@ -92,6 +94,9 @@ def split_data(df):
         # Convert X and y to numpy arrays
         x = np.array(x)
         y = np.array(y)
+
+        print(x.shape,'---------------------------------------------')
+        print(y.shape)
 
         return x, y
     

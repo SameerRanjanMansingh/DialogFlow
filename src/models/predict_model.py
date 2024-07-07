@@ -1,5 +1,8 @@
 import numpy as np
-sequence_length = 5
+import yaml
+
+sequence_length = yaml.safe_load(open('params.yaml', 'r'))['train_model']['sequence_length']
+# sequence_length = 5
 
 
 def generate_next_sentence(model, tokenizer, text_sequence, max_length=5, temperature=0.80):

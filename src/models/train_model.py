@@ -1,11 +1,15 @@
 import sys
-import pathlib
-import sys
+import logging
 import joblib
 import pandas as pd
+import yaml
+import pathlib
 
-from src.data import my_logging_module
+sys.path.append(pathlib.Path(__file__).parent.parent.parent.as_posix())
+
 from src.features.preprocess import split_data
+from src.data.my_logging_module import setup_custom_logger
+
 
 from keras.layers import Input, Embedding, LSTM, Dense
 from keras.models import Model
@@ -15,7 +19,10 @@ from sklearn.model_selection import train_test_split
 from transformers import GPT2Tokenizer
 
 
-tokenizer = GPT2Tokenizer.from_pretrained('/model/tokenizer_path')
+logger = setup_custom_logger("my_app", log_level=logging.INFO, log_file="model.log")
+
+
+tokenizer = GPT2Tokenizer.from_pretrained('model/tokenizer_path')
 
 
 curr_dir = pathlib.Path(__file__)
@@ -23,14 +30,13 @@ home_dir = curr_dir.parent.parent.parent
 sys.path.append(home_dir.as_posix())
 
 
+sequence_length = yaml.safe_load(open('params.yaml', 'r'))['train_model']['sequence_length']
+embedding_dim = yaml.safe_load(open('params.yaml', 'r'))['train_model']['embedding_dim']
+
 
 vocab_size = tokenizer.vocab_size
-embedding_dim = 128
 lstm_units = 200
-sequence_length = 5  # Assuming your sequence length is 5
 
-
-logger = my_logging_module(filename='model.log', level='info', when='D', backCount=3)
 
 
 def build_model():
@@ -59,7 +65,7 @@ def save_model(model, output_path):
     try:
         joblib.dump(model, output_path + "/model.joblib")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred while saving the model: {e}")
 
 
 def main():
@@ -69,8 +75,12 @@ def main():
     pathlib.Path(output_path).mkdir(parents=True, exist_ok=True)
 
     try:
-        df=pd.read_csv(data_path+ 'processed_df.csv')
+        df=pd.read_csv(data_path+ '/processed_data.csv')
         X, y = split_data(df=df)
+
+        print(X.shape)
+        print(y.shape)
+
 
         X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.20, random_state=42)
 
@@ -86,11 +96,14 @@ def main():
             verbose=1,
             callbacks=[callback]
             )
-
         
             save_model(model=model, output_path=output_path)
+
+            
+            logger.info("Training completed")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.critical(f"An error occurred during training: {e}")
+        print(f"An error occurred during training: {e}")
 
 
 
